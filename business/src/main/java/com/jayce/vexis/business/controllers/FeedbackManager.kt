@@ -32,7 +32,7 @@ class FeedbackManager: MyDispatchServlet() {
         content: String,
         type: String
     ): Boolean {
-        val userName = userDao.findByID(userID)?.name ?: "匿名用户"
+        val userName = userDao.findByID(userID)?.nickname ?: "匿名用户"
         val feedbackBean = FeedbackBean(
             feedbackID,
             userName,

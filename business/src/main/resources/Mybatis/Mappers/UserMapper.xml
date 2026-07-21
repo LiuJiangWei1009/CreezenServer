@@ -6,12 +6,8 @@
         select * from user_count where userid = #{userID}
     </select>
 
-    <select id="findByName" parameterType="String" resultType="user">
-        select * from user_count where name = #{name}
-    </select>
-
     <insert id="registerUser" parameterType="user">
-        insert into user_count values (#{userId},#{nickname},#{name},#{password},#{age},#{sex},
+        insert into user_count values (#{userId},#{nickname},#{password},#{age},#{sex},
                                        #{createTime},#{count},#{level},#{adminLevel},#{isEdit},
                                        <choose>
                                            <when test="email != null and email != ''">#{email}</when>

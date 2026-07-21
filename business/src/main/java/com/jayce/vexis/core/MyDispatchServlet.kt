@@ -18,11 +18,6 @@ open class MyDispatchServlet : DispatcherServlet() {
         private var baseFilePath: String = ""
         val BASE_FILE_PATH: String
             get() = baseFilePath
-
-        fun isLocalEnvironment(): Boolean {
-            val env = System.getenv()["CreezenEnv"] ?: "LOCAL"
-            return env == "LOCAL"
-        }
     }
 
     private var eventCenter: EventCenter? = null
@@ -32,7 +27,7 @@ open class MyDispatchServlet : DispatcherServlet() {
         if (applicationContext == null) {
             applicationContext = context
         }
-        initProperties()
+        initProperties(context)
         initRedis(context)
         initSocket(context)
         FileHelper.init()
@@ -50,11 +45,12 @@ open class MyDispatchServlet : DispatcherServlet() {
         eventCenter?.start()
     }
 
-    private fun initProperties() {
-        baseFilePath = if (isLocalEnvironment()) {
-            "D:/FileSystem/"
+    private fun initProperties(context: ApplicationContext) {
+        val isLocalEnvironment = context.environment.activeProfiles.contains("local")
+        baseFilePath = if (isLocalEnvironment) {
+            "D:/FileSystem"
         } else {
-            "/www/CreezenServer/FileSystem/"
+            "/usr/local/tomcat/file"
         }
     }
 }

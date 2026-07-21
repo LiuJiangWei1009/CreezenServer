@@ -46,7 +46,7 @@ class FileManager: MyDispatchServlet() {
             return -1
         }
         bean.fileHash = fileHash
-        val destFile = File("$BASE_FILE_PATH${bean.fileID}${bean.fileSuffix}")
+        val destFile = File("$BASE_FILE_PATH/${bean.fileID}${bean.fileSuffix}")
         destFile.parentFile?.mkdirs()
         Files.move(tempFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         fileDao.insertFile(bean)

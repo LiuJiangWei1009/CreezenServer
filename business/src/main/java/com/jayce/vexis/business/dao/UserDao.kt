@@ -6,7 +6,6 @@ import com.jayce.vexis.util.bean.UserBean
 interface UserDao {
 
     fun findByID(userID: String): UserBean?
-    fun findByName(name: String): UserBean?
 
     fun registerUser(user: UserBean)
     fun registerActiveData(userID: String)

@@ -5,7 +5,6 @@ import com.jayce.vexis.util.Config.NIL
 data class UserBean(
     val userId: String = "-1",
     val nickname: String = "NickUser",
-    val name: String = "匿名用户",
     val age: Int = -1,
     val sex: String = "Unknow",
     val password: String = NIL,

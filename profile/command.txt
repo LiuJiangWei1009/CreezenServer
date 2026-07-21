@@ -1,0 +1,7 @@
+docker run -d --name tomcat -p 8080:8080 -v ./tomcat/apps:/usr/local/tomcat/webapps -v ./tomcat/log:/usr/local/tomcat/logs -v ./tomcat/config:/usr/local/tomcat/conf -e SPRING_PROFILES_ACTIVE=cloud -e TZ=Asia/Shanghai --network creezen tomcat:11.0.10-jdk17
+
+docker run -d --name mysql -p 3307:3307 -e TZ=Asia/Shanghai -e MYSQL_ROOT_PASSWORD=362203 -e MYSQL_USER=creezen -e MYSQL_PASSWORD=362203 -e MYSQL_DATABASE=tianji -e TZ=Asia/Shanghai -v ./mysql/conf:/etc/mysql/ -v ./mysql/data:/var/lib/mysql -v ./mysql/init:/docker-entrypoint-initdb.d -v ./mysql/uploads:/var/lib/mysql-files --network creezen mysql:8.0.26
+
+docker run -d --name redis -p 6379:6379 -v ./redis/conf:/usr/local/etc/redis -v ./redis/data:/data -e TZ=Asia/Shanghai --network creezen redis:6.2.20 redis-server /usr/local/etc/redis/redis.conf
+
+docker run -d --name dozzle -p 8181:8080 -e DOZZLE_REMOTE_AGENT=117.72.197.40:7007 amir20/dozzle:latest

@@ -27,10 +27,6 @@
     </context-param>
 
     <listener>
-        <listener-class>com.jayce.vexis.core.ProfileListener</listener-class>
-    </listener>
-
-    <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
@@ -43,7 +39,6 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
         <multipart-config>
-            <location>D:\FileSystem\head</location>
             <max-file-size>5242800000</max-file-size>
             <max-request-size>5242800000</max-request-size>
             <file-size-threshold>0</file-size-threshold>

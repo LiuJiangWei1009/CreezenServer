@@ -52,7 +52,7 @@ class ArticleManager : MyDispatchServlet() {
                         val fileId = "${getRandomString(6)}${System.currentTimeMillis()}"
                         val suffixIndex = it.originalFilename?.lastIndexOf(".") ?: 0
                         val fileSuffix = it.originalFilename?.substring(suffixIndex)
-                        val destFile = File("$BASE_FILE_PATH${fileId}${fileSuffix}")
+                        val destFile = File("$BASE_FILE_PATH/${fileId}${fileSuffix}")
                         it.transferTo(destFile)
                         fileIndex++
                         "${fileId}${fileSuffix}"

@@ -29,12 +29,8 @@ class AccountManage : MyDispatchServlet() {
 
     @RequestMapping(value = ["/login"])
     @ResponseBody
-    fun login(
-        unique: String,
-        password: String,
-    ): TransferStatusBean {
-        val user = (if (unique.length < 20) userDao.findByName(unique) else userDao.findByID(unique))
-            ?: return status(0)
+    fun login(unique: String, password: String): TransferStatusBean {
+        val user =  userDao.findByID(unique) ?: return status(0)
         if (user.password != password) return status(1)
         if (isUserAlreadyOnline(user.userId)) {
             return status(-3)
@@ -54,29 +50,16 @@ class AccountManage : MyDispatchServlet() {
         return status(2)
     }
 
-    @RequestMapping(value = ["/checkInfo"])
-    @ResponseBody
-    fun checkInfo(userName: String): Boolean {
-        val state = RedisUtil.queryUser(userName)
-        if (state != null) return state == "1"
-        val user = userDao.findByName(userName)
-        val status = if (user == null) "0" else "1"
-        RedisUtil.saveUser(userName, status)
-        return (user == null)
-    }
-
     @RequestMapping(value = ["/postAvatar"])
     @ResponseBody
-    fun uploadAvatar(
-        userID: String,
-        file: MultipartFile,
-    ): Boolean {
+    fun uploadAvatar(userID: String, file: MultipartFile): Boolean {
         // 根据web.xml里面的file-size-threshold判断是否要存在磁盘（文件夹下）
         // MultipartFile操作的实际上是临时文件夹下面的文件
         // 在请求结束后，这个MultipartFile实例被销毁，临时文件夹被删除
-        log.d("$userID  ${file.originalFilename}")
+        val path = "${BASE_FILE_PATH}/head/$userID.png"
+        log.d("avatar file path: $path")
         //  val hash = FileHelper.getFileHash(file.inputStream, "SHA256")
-        file.transferTo(File("D:/FileSystem/head/$userID.png"))
+        file.transferTo(File(path))
         return true
     }
 
