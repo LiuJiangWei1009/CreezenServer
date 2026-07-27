@@ -16,6 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Position to start replication or point-in-time recovery from
+--
+
+-- CHANGE MASTER TO MASTER_LOG_FILE='DESKTOP-04KARUN-bin.000174', MASTER_LOG_POS=1835;
+
+--
 -- Current Database: `tianji`
 --
 
@@ -50,7 +56,7 @@ CREATE TABLE `active_index` (
 
 LOCK TABLES `active_index` WRITE;
 /*!40000 ALTER TABLE `active_index` DISABLE KEYS */;
-INSERT INTO `active_index` VALUES ('1DdCLv6AKq',0,0,0,0,0,1,0),('DaZcBFZdFr',0,0,0,0,0,1,0);
+INSERT INTO `active_index` VALUES ('1DdCLv6AKq',0,0,0,0,0,1,0),('GFk1jrSJmR',0,0,0,0,0,0,0);
 /*!40000 ALTER TABLE `active_index` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -101,7 +107,9 @@ CREATE TABLE `feedback` (
   `createTime` varchar(20) DEFAULT NULL,
   `support` bigint DEFAULT NULL,
   `against` bigint DEFAULT NULL,
-  PRIMARY KEY (`feedbackID`)
+  PRIMARY KEY (`feedbackID`),
+  KEY `feedback_userid` (`userid`),
+  CONSTRAINT `feedback_userid` FOREIGN KEY (`userid`) REFERENCES `user_count` (`userid`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -111,7 +119,7 @@ CREATE TABLE `feedback` (
 
 LOCK TABLES `feedback` WRITE;
 /*!40000 ALTER TABLE `feedback` DISABLE KEYS */;
-INSERT INTO `feedback` VALUES ('d9HHKem','123456','1DdCLv6AKq','NORMAL','反馈呢？','怎么一个都没有了','1783754692691',1,0),('x8Ir9T4','1234567','DaZcBFZdFr','NORMAL','芜湖','芜湖大司马了','1784159388981',0,0);
+INSERT INTO `feedback` VALUES ('QiNO0Ng','芜湖','1DdCLv6AKq','NORMAL','的距离','他的截图','1785291207932',0,0);
 /*!40000 ALTER TABLE `feedback` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -161,7 +169,7 @@ CREATE TABLE `relation` (
 
 LOCK TABLES `relation` WRITE;
 /*!40000 ALTER TABLE `relation` DISABLE KEYS */;
-INSERT INTO `relation` VALUES ('1DdCLv6AKq','1DdCLv6AKq',0),('DaZcBFZdFr','DaZcBFZdFr',0);
+INSERT INTO `relation` VALUES ('1DdCLv6AKq','1DdCLv6AKq',0);
 /*!40000 ALTER TABLE `relation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -225,7 +233,7 @@ CREATE TABLE `resource` (
 
 LOCK TABLES `resource` WRITE;
 /*!40000 ALTER TABLE `resource` DISABLE KEYS */;
-INSERT INTO `resource` VALUES ('1DdCLv6AKq','1783128674153.jpg','Eet2xM1783912522853','.jpg','佛得角牛逼🇨🇻','',561141,'2026-07-13 11:15:22','abc00542dc3a4ff1c988380139cc4d25da603648d92d2ac992a0245473469228'),('1DdCLv6AKq','completion-end-multifile.ts.html','Gjbcyo1783912725666','.html','啥会忘记名字','',8756,'2026-07-13 11:18:45','8ba0c5564e80a9fe2403e278b065d2132f6d1afbe7740434f4fc7349dcd15bed'),('1DdCLv6AKq','highlights.ts.html','lu8aDL1783913192359','.html','看图','',4763,'2026-07-13 11:26:32','8a72523ebd2a64c2889dbf4cb1bca772cb120e438124adc4e1c0a25ea515b718'),('1DdCLv6AKq','query-offset.ts.html','I15k8Q1783913798904','.html','好无聊截图','',2395,'2026-07-13 11:36:38','c87ea6b4ebdc5ca44756621c7d125c235e9080c8cc5de7209f9dd424c9b500d4'),('1DdCLv6AKq','mmexport1714632012144.jpg','hClKlQ1784098885375','.jpg','五一','',305052,'2026-07-15 15:01:25','09414d3d11f5a15026d04a587e8c39d0589c647f0de19639bbdabad5097f392a'),('1DdCLv6AKq','Glass_Echoe_3.mp3','yRmHKz1784098925364','.mp3','玻璃心','',1332059,'2026-07-15 15:02:05','abf39b1d02b3d8a5d151b8e1d25ef2608dec8baf78d2fc55219e06a57224e6ff');
+INSERT INTO `resource` VALUES ('1DdCLv6AKq','1783128674153.jpg','Eet2xM1783912522853','.jpg','佛得角牛逼🇨🇻','',561141,'2026-07-13 11:15:22','abc00542dc3a4ff1c988380139cc4d25da603648d92d2ac992a0245473469228'),('1DdCLv6AKq','completion-end-multifile.ts.html','Gjbcyo1783912725666','.html','啥会忘记名字','',8756,'2026-07-13 11:18:45','8ba0c5564e80a9fe2403e278b065d2132f6d1afbe7740434f4fc7349dcd15bed'),('1DdCLv6AKq','highlights.ts.html','lu8aDL1783913192359','.html','看图','',4763,'2026-07-13 11:26:32','8a72523ebd2a64c2889dbf4cb1bca772cb120e438124adc4e1c0a25ea515b718'),('1DdCLv6AKq','query-offset.ts.html','I15k8Q1783913798904','.html','好无聊截图','',2395,'2026-07-13 11:36:38','c87ea6b4ebdc5ca44756621c7d125c235e9080c8cc5de7209f9dd424c9b500d4'),('1DdCLv6AKq','mmexport1714632012144.jpg','hClKlQ1784098885375','.jpg','五一','',305052,'2026-07-15 15:01:25','09414d3d11f5a15026d04a587e8c39d0589c647f0de19639bbdabad5097f392a'),('1DdCLv6AKq','Glass_Echoe_3.mp3','yRmHKz1784098925364','.mp3','玻璃心','',1332059,'2026-07-15 15:02:05','abf39b1d02b3d8a5d151b8e1d25ef2608dec8baf78d2fc55219e06a57224e6ff'),('1DdCLv6AKq','Screenshot_2026-04-05-07-19-35-14_b4369fd79d28fa5f315d35409576a8d1.jpg','4YaTKS1784979837540','.jpg','一个图片','',619158,'2026-07-25 19:43:57','32d237606a4ff7b6d3965958b08c1c7c89f037f04b40e7b486de60ecee67aa4f'),('1DdCLv6AKq','+8617607162521-2506241933.mp3','zEe6aK1785118887934','.mp3','电话录音','',831859,'2026-07-27 10:21:27','f06f65da871d09c3434355f47016fba72b27ea2614e863d3840ba3c01ac19814'),('1DdCLv6AKq','爸爸-2502092017.mp3','uUDwqr1785123065133','.mp3','和我爸的聊天','',1026907,'2026-07-27 11:31:05','d9b2ac11601fe72e991c59f699998a4fe1053df34f679b5e89d05dde9725af72');
 /*!40000 ALTER TABLE `resource` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -319,7 +327,7 @@ CREATE TABLE `user_count` (
 
 LOCK TABLES `user_count` WRITE;
 /*!40000 ALTER TABLE `user_count` DISABLE KEYS */;
-INSERT INTO `user_count` VALUES ('1DdCLv6AKq','芜湖','123456',30,'男','2026-07-11 15:19:59',0,0,1,-1,'578616559@qq.com','江西省宜春市樟树市','芜湖，起灰！','1996-10-09','13672249863',''),('DaZcBFZdFr','芜湖','123456',30,'男','2026-07-16 07:48:40',0,0,0,-1,'xjjdjddjjckkckfkk@yahoo.com','江西省宜春市樟树市','哈哈，起灰！🛩️','1996-10-09','13672249863','');
+INSERT INTO `user_count` VALUES ('1DdCLv6AKq','芜湖','123456',30,'男','2026-07-11 15:19:59',0,0,1,-1,'578616559@qq.com','江西省宜春市樟树市','芜湖，起灰！','1996-10-09','13672249863',''),('GFk1jrSJmR','刻苦','123456',26,'保密','2026-07-29 12:56:09',0,0,0,-1,NULL,NULL,'把居然','2000-01-01','','');
 /*!40000 ALTER TABLE `user_count` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

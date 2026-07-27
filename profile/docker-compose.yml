@@ -83,26 +83,23 @@ services:
     depends_on:
       tomcat:
         condition: service_healthy
-  dozzle-local:
-    image: amir20/dozzle:latest
-    container_name: dozzle
-    profiles:
-      - "local"
-    ports:
-      - "${DOZZLE_PORT_OUTER}:${DOZZLE_PORT_INNER}"
-    environment:
-      DOZZLE_REMOTE_AGENT: ${DOZZLE_AGENT}
-  dozzle-cloud:
-    image: amir20/dozzle:latest
-    container_name: dozzle
-    profiles:
-      - "cloud"
-    ports:
-      - "${DOZZLE_PORT_OUTER}:${DOZZLE_PORT_INNER}"
+  flyway:
+    image: flyway/flyway:13-alpine-mongo
+    container_name: flyway
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    command:
-      - agent
+      - "./mysql/migration:/flyway/sql"
+      - "./mysql/conf:/flyway/conf"
+    environment:
+      FLYWAY_URL: jdbc:mysql://mysql:3307/tianji?characterEncoding=UTF-8&&serverTimezone=UTC&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+      FLYWAY_USER: root
+      FLYWAY_PASSWORD: 362203
+      FLYWAY_BASELINE_ON_MIGRATE: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - creezen
+    command: migrate
 networks:
   creezen:
     external: true

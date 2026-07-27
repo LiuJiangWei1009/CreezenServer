@@ -1,15 +1,18 @@
 package com.jayce.vexis.business.controllers
 
-import com.jayce.vexis.util.bean.ActiveBean
-import com.jayce.vexis.util.bean.TransferStatusBean
-import com.jayce.vexis.util.bean.UserBean
-import com.jayce.vexis.util.toJson
 import com.jayce.vexis.business.dao.UserDao
 import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.foundation.Log
+import com.jayce.vexis.foundation.utils.NetUtil
 import com.jayce.vexis.foundation.utils.RedisUtil
 import com.jayce.vexis.foundation.utils.RedisUtil.isUserAlreadyOnline
 import com.jayce.vexis.foundation.utils.RedisUtil.setOnlineStatus
+import com.jayce.vexis.util.bean.ActiveBean
+import com.jayce.vexis.util.bean.TransferStatusBean
+import com.jayce.vexis.util.bean.UserBean
+import com.jayce.vexis.util.getRandomString
+import com.jayce.vexis.util.toJson
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestBody
@@ -17,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
-import java.util.UUID
+import java.util.*
 
 @Controller
 class AccountManage : MyDispatchServlet() {
@@ -41,13 +44,33 @@ class AccountManage : MyDispatchServlet() {
         return status(-1, userJson)
     }
 
+    @RequestMapping(value = ["/sendEmailCode"])
+    @ResponseBody
+    fun sendEmailCode(id: String, email: String): TransferStatusBean {
+        val code = getRandomString(6)
+        val user = userDao.findUserByEmail(email)
+        if (user != null) return status(-1, "邮箱已被注册")
+        val result = NetUtil.sendEmail(id, email, code)
+        val resultJson = JSONObject(result)
+        log.d("code: $code resultJson: $resultJson")
+        val resultCode = resultJson.optInt("code")
+        return if (resultCode == 200) {
+            RedisUtil.saveEmailCode(id, code)
+            status(0)
+        } else {
+            status(-2, "邮件发送失败！")
+        }
+    }
+
     @RequestMapping(value = ["/register"])
     @ResponseBody
-    fun register(@RequestBody requestUser: UserBean): TransferStatusBean {
+    fun register(@RequestBody requestUser: UserBean, code: String): TransferStatusBean {
         log.d("user: $requestUser")
+        val isEmailCodeOK = RedisUtil.checkEmailCode(requestUser.userId, code)
+        if (!isEmailCodeOK) return status(-1, "验证码错误")
         userDao.registerUser(requestUser)
         userDao.registerActiveData(requestUser.userId)
-        return status(2)
+        return status(0)
     }
 
     @RequestMapping(value = ["/postAvatar"])

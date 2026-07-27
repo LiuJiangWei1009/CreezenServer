@@ -11,6 +11,7 @@ import org.springframework.data.redis.connection.stream.*
 import org.springframework.data.redis.core.*
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 object RedisUtil {
@@ -36,7 +37,7 @@ object RedisUtil {
     private lateinit var hyperLogOpt: HyperLogLogOperations<String, Any>
     private lateinit var clusterOpt: ClusterOperations<String, Any>
 
-    private val streamOption =  StreamReadOptions.empty().count(STREAM_READ_COUNT).block(Duration.ofMinutes(STREAM_BLOCK_TIME))
+    private val streamOption =  StreamReadOptions.empty().count(STREAM_READ_COUNT).block(Duration.ZERO)
     private val streamOffset =  StreamOffset.create(STREAM_NAME, ReadOffset.lastConsumed())
     private val ackStreamOffset = StreamOffset.create(STREAM_NAME, ReadOffset.from("0"))
     private val consumerMap: ConcurrentHashMap<String, Consumer> = ConcurrentHashMap()
@@ -72,25 +73,23 @@ object RedisUtil {
         kotlin.runCatching {
             streamOpt.createGroup(STREAM_NAME, ReadOffset.from("0"), userId)
         }.onFailure {
-            log.d("Group $userId exist!")
+            log.i("Group $userId exist!")
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <K, V> readStream(userId: String, ack: AtomicBoolean): List<MapRecord<String, K, V>> {
-        return withContext(Dispatchers.IO) {
-            val consumer = consumerMap.getOrPut(userId) {
-                Consumer.from(userId, STREAM_CONSUMER)
-            }
-            val finalList = arrayListOf<MapRecord<String, Any, Any>>()
-            if (ack.get()) {
-                ack.set(false)
-                finalList.addAll(streamOpt.read(consumer, streamOption, ackStreamOffset) ?: listOf())
-            }
-            val list = streamOpt.read(consumer, streamOption, streamOffset)
-            finalList.addAll(list ?: listOf())
-            finalList as List<MapRecord<String, K, V>>
+    fun <K, V> readStream(userId: String, ack: AtomicBoolean): List<MapRecord<String, K, V>> {
+        val consumer = consumerMap.getOrPut(userId) {
+            Consumer.from(userId, STREAM_CONSUMER)
         }
+        val finalList = arrayListOf<MapRecord<String, Any, Any>>()
+        if (ack.get()) {
+            ack.set(false)
+            finalList.addAll(streamOpt.read(consumer, streamOption, ackStreamOffset) ?: listOf())
+        }
+        val list = streamOpt.read(consumer, streamOption, streamOffset)
+        finalList.addAll(list ?: listOf())
+        return finalList as List<MapRecord<String, K, V>>
     }
 
     fun <V> writeStream(content: V) {
@@ -145,6 +144,14 @@ object RedisUtil {
 
     fun saveUser(name: String, status: String) {
         stringOpt.set(name, status)
+    }
+
+    fun saveEmailCode(id: String, code: String) {
+        stringOpt.set(id, code, 60, TimeUnit.SECONDS)
+    }
+
+    fun checkEmailCode(id: String, code: String): Boolean {
+        return stringOpt.get(id) == code
     }
 
     fun queryUser(name: String): String? {

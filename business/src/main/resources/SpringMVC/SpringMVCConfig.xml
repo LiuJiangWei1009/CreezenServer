@@ -19,6 +19,7 @@
             <mvc:exclude-mapping path="/login"/>
             <mvc:exclude-mapping path="/checkInfo"/>
             <mvc:exclude-mapping path="/register"/>
+            <mvc:exclude-mapping path="/sendEmailCode"/>
             <mvc:exclude-mapping path="/*.html"/>
             <mvc:exclude-mapping path="/*.css"/>
             <mvc:exclude-mapping path="/scripts/*.js"/>

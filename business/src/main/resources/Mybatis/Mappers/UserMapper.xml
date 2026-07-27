@@ -56,4 +56,8 @@
     <select id="queryRelation" resultType="int">
         select count(*) from relation where userid = #{userId} and fansid = #{fansId}
     </select>
+
+    <select id="findUserByEmail" parameterType="String" resultType="user">
+        select * from user_count where email = #{email}
+    </select>
 </mapper>

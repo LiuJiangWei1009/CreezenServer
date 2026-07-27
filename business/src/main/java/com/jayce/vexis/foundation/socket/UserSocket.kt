@@ -1,6 +1,5 @@
 package com.jayce.vexis.foundation.socket
 
-import com.jayce.vexis.util.Config.EVENT_TYPE_DEFAULT
 import com.jayce.vexis.util.Config.EVENT_TYPE_EXIT
 import com.jayce.vexis.util.bean.TelecomBean
 import com.jayce.vexis.util.toBean
@@ -14,6 +13,7 @@ import com.jayce.vexis.foundation.utils.RedisUtil.sendFinishMsg
 import com.jayce.vexis.foundation.utils.RedisUtil.setOfflineStatus
 import com.jayce.vexis.foundation.utils.RedisUtil.verifyOnlineStatus
 import com.jayce.vexis.foundation.utils.RedisUtil.writeStream
+import com.jayce.vexis.foundation.utils.ThreadUtil.workLooper
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -31,101 +31,71 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
     private lateinit var writer: BufferedWriter
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val deferred = CompletableDeferred<String>()
 
-    var isDied: Boolean = false
-    var isFirst: AtomicBoolean = AtomicBoolean(true)
+    private lateinit var userId: String
+    private var hasFinish: Boolean = false
+    private var isDied: Boolean = false
+    private var isFirst: AtomicBoolean = AtomicBoolean(true)
 
     fun init() {
         reader = BufferedReader(InputStreamReader(socket.getInputStream(), "UTF-8"))
         writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
-        start()
+        val shakeMessage = reader.readLine().toBean<TelecomBean>()
+        if (shakeMessage == null || !shakeMessage.isShake()) {
+            destroy()
+            return
+        }
+        identify(shakeMessage)
+        startRead()
+        startWrite()
     }
 
-    private fun start() {
-        writeContent()
-        readMessage()
+    private fun identify(shakeMessage: TelecomBean) {
+        userId = shakeMessage.content
+        RedisUtil.createStreamGroupIfNeed(userId)
+        if (verifyOnlineStatus(shakeMessage)) {
+            callback.invoke(this@UserSocket, userId)
+        } else {
+            sendFinishMsg(userId, shakeMessage)
+        }
     }
 
-    private fun writeContent() {
-        scope.launch {
-            while (true) {
-                val line = reader.readLine()
-                log.d("接收消息： $line")
-                if (line.isNullOrEmpty()) {
-                    sendFinishMsg(deferred.await())
-                    setOfflineStatus(deferred.await())
+    private fun startRead() {
+        workLooper(scope) {
+            if (!it) {
+                if (!hasFinish) markDeath()
+                return@workLooper false
+            }
+            val line = reader.readLine()
+            log.d("接收消息： $line")
+            if (line.isNullOrEmpty()) {
+                markDeath()
+                return@workLooper false
+            }
+            writeStream(line)
+            return@workLooper true
+        }
+    }
+
+    private fun startWrite() {
+        workLooper(scope) {
+            readStream<String, String>(userId, isFirst).forEach {
+                log.d("发送消息： ${it.value}")
+                val json = JSONObject(it.value[STREAM_CONTENT_KEY])
+                val type = json.optInt("type", -1)
+                val userId = json.optString("userId", "")
+                if (type == EVENT_TYPE_EXIT) {
+                    ack(userId, it.id)
+                    setOfflineStatus(userId)
+                    write(json.toString())
                     destroy()
-                    continue
+                    return@workLooper false
                 }
-                if (!identify(line)) return@launch
-                writeStream(line)
+                json.put(STREAM_MESSAGE_ID, it.id)
+                write(json.toString())
+                ack(userId, it.id)
             }
-        }
-    }
-
-    private suspend fun identify(line: String): Boolean {
-        val msg = line.toBean<TelecomBean>() ?: return false
-        if (msg.type == EVENT_TYPE_DEFAULT) {
-            RedisUtil.createStreamGroupIfNeed(msg.content)
-            deferred.complete(msg.content)
-            if (verifyOnlineStatus(msg)) {
-                callback.invoke(this@UserSocket, msg.content)
-            } else {
-                sendFinishMsg(deferred.await(), msg)
-                return false
-            }
-        }
-        return true
-    }
-
-    private fun readMessage() {
-        scope.launch {
-            while (true) {
-                val currentUserId = deferred.await()
-                readStream<String, String>(currentUserId, isFirst).forEach {
-                    log.d("发送消息： ${it.value}")
-                    if (it.value.containsKey("finishMessage")) return@forEach
-                    val json = JSONObject(it.value[STREAM_CONTENT_KEY])
-                    val type = json.optInt("type", -1)
-                    val userId = json.optString("userId", "")
-                    val session = json.optString("session", "")
-                    if (type == EVENT_TYPE_EXIT) {
-                        ack(currentUserId, it.id)
-                        if (userId == currentUserId && session.isNotEmpty()) {
-                            setOfflineStatus(currentUserId)
-                            val content = json.toString()
-                            write(content)
-                            destroy()
-                            return@launch
-                        } else {
-                            return@forEach
-                        }
-                    }
-                    json.put(STREAM_MESSAGE_ID, it.id)
-                    val content =  json.toString()
-                    write(content)
-                    ack(currentUserId, it.id)
-                }
-            }
-        }
-    }
-
-    fun destroy() {
-        if (isDied) return
-        isDied = true
-        kotlin.runCatching {
-            reader.close()
-            writer.close()
-            socket.close()
-        }.onFailure {
-            log.e("socket destroy: ${it.message}")
-        }
-
-        kotlin.runCatching {
-            scope.cancel()
-        }.onFailure {
-            log.e("scope cancel: ${it.message}")
+            return@workLooper true
         }
     }
 
@@ -134,7 +104,28 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
             writer.write("$content\n")
             writer.flush()
         }.onFailure {
-            log.d("socket write error: ${it.message}")
+            log.i("Socket write error: ${it.message}")
+        }
+    }
+
+    private fun markDeath() {
+        sendFinishMsg(userId)
+        setOfflineStatus(userId)
+        hasFinish = true
+    }
+
+    fun destroy() {
+        if (isDied) return
+        isDied = true
+        kotlin.runCatching {
+            socket.shutdownInput()
+            socket.shutdownOutput()
+            reader.close()
+            writer.close()
+            socket.close()
+            scope.cancel()
+        }.onFailure {
+            log.e("Socket destroy error: ${it.message}")
         }
     }
 }

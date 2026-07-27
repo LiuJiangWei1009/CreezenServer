@@ -10,6 +10,7 @@ xcopy /E /I  .\profile\nginx\file .\resource\nginx\file
 mkdir ./resource\nginx\log
 xcopy /E /I  .\profile\mysql\conf .\resource\mysql\conf
 xcopy /E /I  .\profile\mysql\init .\resource\mysql\init
+xcopy /E /I  .\profile\mysql\migration .\resource\mysql\migration
 mkdir .\resource\mysql\data
 mkdir .\resource\mysql\uploads
 xcopy /E /I  .\profile\redis\conf .\resource\redis\conf
