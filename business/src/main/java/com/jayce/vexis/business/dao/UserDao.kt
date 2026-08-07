@@ -6,17 +6,22 @@ import com.jayce.vexis.util.bean.UserBean
 interface UserDao {
 
     fun findByID(userID: String): UserBean?
+
     fun findUserByEmail(email: String): UserBean?
 
     fun registerUser(user: UserBean)
+
     fun registerActiveData(userID: String)
 
     fun getAllUser(): List<ActiveBean>
 
     fun setAdmin(userId: String): Boolean
+
     fun deleteUser(userId: String): Boolean
 
     fun queryRelation(userId: String, fansId: String): Int
+
     fun followUser(userId: String, fansId: String, relation: Int): Boolean
+    
     fun updateRelation(userId: String): Boolean
 }

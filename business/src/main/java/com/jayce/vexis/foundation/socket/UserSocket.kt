@@ -83,7 +83,6 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
                 log.d("发送消息： ${it.value}")
                 val json = JSONObject(it.value[STREAM_CONTENT_KEY])
                 val type = json.optInt("type", -1)
-                val userId = json.optString("userId", "")
                 if (type == EVENT_TYPE_EXIT) {
                     ack(userId, it.id)
                     setOfflineStatus(userId)

@@ -1,9 +1,9 @@
 package com.jayce.vexis.business.controllers
 
-import com.jayce.vexis.util.bean.PeerAdviceBean
-import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.business.dao.SeniorDao
+import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.foundation.Log
+import com.jayce.vexis.util.bean.PeerAdviceBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping

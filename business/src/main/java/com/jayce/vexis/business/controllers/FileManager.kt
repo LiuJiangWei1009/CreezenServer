@@ -58,4 +58,13 @@ class FileManager: MyDispatchServlet() {
     fun fetch(): List<FileBean> {
         return fileDao.getFile()
     }
+
+    @RequestMapping(value = ["/loadSlider"])
+    @ResponseBody
+    fun loadSlider(): List<String> {
+        val directory = File("$BASE_FILE_PATH/slider")
+        val files = directory.listFiles() ?: return listOf()
+        val nameList = files.map { it.name }
+        return nameList
+    }
 }

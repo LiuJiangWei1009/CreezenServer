@@ -26,7 +26,7 @@
             <mvc:exclude-mapping path="/web/**"/>
             <mvc:exclude-mapping path="/uploadApk"/>
             <mvc:exclude-mapping path="/checkApkInfo"/>
-            <mvc:exclude-mapping path="/aaa"/>
+            <mvc:exclude-mapping path="/loadSlider"/>
             <bean class="com.jayce.vexis.core.StatusInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

@@ -75,14 +75,14 @@ class AccountManage : MyDispatchServlet() {
 
     @RequestMapping(value = ["/postAvatar"])
     @ResponseBody
-    fun uploadAvatar(userID: String, file: MultipartFile): Boolean {
+    fun uploadAvatar(userID: String, avatar: MultipartFile): Boolean {
         // 根据web.xml里面的file-size-threshold判断是否要存在磁盘（文件夹下）
         // MultipartFile操作的实际上是临时文件夹下面的文件
         // 在请求结束后，这个MultipartFile实例被销毁，临时文件夹被删除
         val path = "${BASE_FILE_PATH}/head/$userID.png"
         log.d("avatar file path: $path")
         //  val hash = FileHelper.getFileHash(file.inputStream, "SHA256")
-        file.transferTo(File(path))
+        avatar.transferTo(File(path))
         return true
     }
 
@@ -115,10 +115,7 @@ class AccountManage : MyDispatchServlet() {
         return 1
     }
 
-    private fun status(
-        code: Int,
-        data: String? = "",
-    ): TransferStatusBean {
+    private fun status(code: Int, data: String? = ""): TransferStatusBean {
         val value = data ?: ""
         return TransferStatusBean(code, value)
     }
