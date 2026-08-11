@@ -1,6 +1,6 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.vo
 
-data class PeerAdviceBean (
+data class PeerVO (
     val primary: String = "",
     val second: String = "",
     val tertiary: String = "",

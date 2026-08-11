@@ -4,15 +4,18 @@
 <configuration>
 
     <typeAliases>
-        <typeAlias type="com.jayce.vexis.util.bean.UserBean" alias="user"/>
-        <typeAlias type="com.jayce.vexis.util.bean.FileBean" alias="fileBean"/>
-        <typeAlias type="com.jayce.vexis.util.bean.FeedbackBean" alias="feedbackBean"/>
-        <typeAlias type="com.jayce.vexis.util.bean.ActiveBean" alias="activeData"/>
-        <typeAlias type="com.jayce.vexis.util.bean.ArticleBean" alias="articleBean"/>
-        <typeAlias type="com.jayce.vexis.util.bean.SectionBean" alias="sectionBean"/>
-        <typeAlias type="com.jayce.vexis.util.bean.RemarkBean" alias="remarkBean"/>
-        <typeAlias type="com.jayce.vexis.util.bean.PeerAdviceBean" alias="peerAdviceBean"/>
-        <typeAlias type="com.jayce.vexis.util.bean.HistoryBean" alias="historyBean"/>
+        <typeAlias type="com.jayce.vexis.util.dto.UserDTO" alias="userDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.AuthDTO" alias="authDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.ProfileDTO" alias="profileDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.PrivilegeDTO" alias="privilegeDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.FileDTO" alias="fileDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.FeedbackDTO" alias="feedbackDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.ActiveDTO" alias="activeDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.ArticleDTO" alias="articleDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.SectionDTO" alias="sectionDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.RemarkDTO" alias="remarkDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.PeerDTO" alias="peerAdviceDTO"/>
+        <typeAlias type="com.jayce.vexis.util.dto.HistoryDTO" alias="historyDTO"/>
     </typeAliases>
 
     <mappers>

@@ -1,6 +1,6 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.vo
 
-data class ActiveBean(
+data class ActiveVO(
     val userID: String,
     val nickname: String? = null,
     val createTime: String,
@@ -13,8 +13,8 @@ data class ActiveBean(
     val follow: Long = 0,
     val fans: Long = 0,
     val post: Int = 0,
-){
-    fun isAdministrator(): Boolean {
+) {
+    fun isAdmin(): Boolean {
         return adminLevel > 0
     }
 }

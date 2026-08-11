@@ -1,22 +1,22 @@
 package com.jayce.vexis.business.dao
 
-import com.jayce.vexis.util.bean.ArticleBean
-import com.jayce.vexis.util.bean.RemarkBean
-import com.jayce.vexis.util.bean.SectionBean
+import com.jayce.vexis.util.dto.ArticleDTO
+import com.jayce.vexis.util.dto.RemarkDTO
+import com.jayce.vexis.util.dto.SectionDTO
 
 interface ArticleDao {
 
-    fun saveArticle(articleBean: ArticleBean)
+    fun saveArticle(articleDTO: ArticleDTO)
 
-    fun saveSection(sectionBean: SectionBean)
+    fun saveSection(sectionDTO: SectionDTO)
 
-    fun getArticle(): List<ArticleBean>
+    fun getArticle(): List<ArticleDTO>
 
-    fun getSections(articleId: Long): List<SectionBean>
+    fun getSections(articleId: Long): List<SectionDTO>
 
-    fun getRemark(sectionId: Long): List<RemarkBean>
+    fun getRemark(sectionId: Long): List<RemarkDTO>
 
-    fun insertRemark(remarkBean: RemarkBean)
+    fun insertRemark(remarkDTO: RemarkDTO)
 
     fun deleteArticle(articleId: Long)
 }

@@ -1,13 +1,10 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.vo
 
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-data class HistoryBean (
-    val time: String,
-    val event: String
-) {
+data class HistoryVO (val time: String, val event: String) {
 
     fun isValid() = time.length == 17
 

@@ -60,3 +60,7 @@ fun getMaxDayOfMonth(year: Int, month: Int): Int {
         else -> if (isLeap) 29 else 28
     }
 }
+
+fun <T> Collection<DataConverter<T>>.vo(): List<T> {
+    return map{ it.vo() }
+}

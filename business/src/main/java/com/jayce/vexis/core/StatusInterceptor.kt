@@ -2,9 +2,9 @@ package com.jayce.vexis.core
 
 import com.jayce.vexis.util.Config.COOKIE_USER_ID
 import com.jayce.vexis.util.Config.COOKIE_UUID
-import com.jayce.vexis.util.bean.TransferStatusBean
 import com.jayce.vexis.util.toJson
 import com.jayce.vexis.foundation.utils.RedisUtil.verifyOnlineStatus
+import com.jayce.vexis.util.vo.StatusVO
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.servlet.HandlerInterceptor
@@ -29,7 +29,7 @@ class StatusInterceptor: HandlerInterceptor {
             if (verifyOnlineStatus(userId, session)) {
                 return true
             }
-            val status = TransferStatusBean(1001, "reject")
+            val status = StatusVO(1001, "reject")
             response.status = 200
             response.writer.write(status.toJson())
             return false

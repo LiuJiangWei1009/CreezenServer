@@ -1,11 +1,9 @@
 package com.jayce.vexis.foundation.utils
 
 import com.jayce.vexis.util.Config.EVENT_TYPE_EXIT
-import com.jayce.vexis.util.bean.TelecomBean
+import com.jayce.vexis.util.dto.EventDTO
 import com.jayce.vexis.util.toJson
 import com.jayce.vexis.foundation.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.context.ApplicationContext
 import org.springframework.data.redis.connection.stream.*
 import org.springframework.data.redis.core.*
@@ -97,8 +95,8 @@ object RedisUtil {
         streamOpt.add(STREAM_NAME, map)
     }
 
-    fun sendFinishMsg(userId: String, msg: TelecomBean? = null) {
-        val finishJson = TelecomBean(
+    fun sendFinishMsg(userId: String, msg: EventDTO? = null) {
+        val finishJson = EventDTO(
             type = EVENT_TYPE_EXIT,
             userId = userId,
             nickName = msg?.nickName ?: "",
@@ -121,7 +119,7 @@ object RedisUtil {
         return session != null
     }
 
-    fun verifyOnlineStatus(msg: TelecomBean): Boolean {
+    fun verifyOnlineStatus(msg: EventDTO): Boolean {
         val cacheSession = stringOpt.get(getOnlineKey(msg.userId))
         log.d("校验session 缓存：$cacheSession 新：${msg.session}")
         if (cacheSession == null || cacheSession == msg.session) {

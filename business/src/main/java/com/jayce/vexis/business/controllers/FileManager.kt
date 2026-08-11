@@ -4,7 +4,9 @@ import com.jayce.vexis.business.dao.FileDao
 import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.foundation.Log
 import com.jayce.vexis.foundation.utils.FileHelper
-import com.jayce.vexis.util.bean.FileBean
+import com.jayce.vexis.util.dto.FileDTO
+import com.jayce.vexis.util.vo
+import com.jayce.vexis.util.vo.FileVO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,19 +28,19 @@ class FileManager: MyDispatchServlet() {
     @RequestMapping(value = ["/fileUpload"])
     @ResponseBody
     fun upload(
-        @RequestPart("fileEntry") fileBean: FileBean,
+        @RequestPart("fileEntry") fileDTO: FileDTO,
         @RequestPart("file") file: MultipartFile,
     ): Int {
-        log.d("${file.originalFilename}   $fileBean")
+        log.d("${file.originalFilename}   $fileDTO")
         val tempFile = FileHelper.tempFile()
         file.transferTo(tempFile)
         val filePair = FileHelper.getFileHashAndType(tempFile, "SHA256")
         val fileHash = filePair.first
         val fileType = filePair.second
         val bean = if (fileType.isNotEmpty()) {
-            fileBean.copy(fileSuffix = ".$fileType")
+            fileDTO.copy(fileSuffix = ".$fileType")
         } else {
-            fileBean
+            fileDTO
         }
         val existFile = fileDao.findFileByHash(fileHash)
         if (existFile != null) {
@@ -55,8 +57,8 @@ class FileManager: MyDispatchServlet() {
 
     @RequestMapping(value = ["/fileFetch"])
     @ResponseBody
-    fun fetch(): List<FileBean> {
-        return fileDao.getFile()
+    fun fetch(): List<FileVO> {
+        return fileDao.getFile().vo()
     }
 
     @RequestMapping(value = ["/loadSlider"])

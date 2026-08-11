@@ -2,12 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.jayce.vexis.business.dao.FeedbackDao">
-    <insert id="insertFeedback" parameterType="feedbackBean">
+    <insert id="insertFeedback" parameterType="feedbackDTO">
         insert into feedback values (#{feedbackID}, #{userName}, #{userID}, #{type}, #{title},
                                      #{content}, #{createTime}, #{support}, #{against})
     </insert>
 
-    <select id="getFeedback" resultType="feedbackBean">
+    <select id="getFeedback" resultType="feedbackDTO">
         select * from feedback
     </select>
 
