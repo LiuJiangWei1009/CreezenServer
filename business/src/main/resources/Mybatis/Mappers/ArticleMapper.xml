@@ -2,29 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.jayce.vexis.business.dao.ArticleDao">
-    <insert id="saveArticle" parameterType="articleBean"
+    <insert id="saveArticle" parameterType="articleDTO"
         useGeneratedKeys="true" keyProperty="articleId">
         insert into article(userId, title, createTime, updateTime, favor)
         values (#{userId}, #{title}, #{createTime}, #{updateTime}, #{favor})
     </insert>
     
-    <insert id="saveSection" parameterType="sectionBean">
+    <insert id="saveSection" parameterType="sectionDTO">
         insert into section(articleId, orderId, type, content) values (#{articleId}, #{orderId}, #{type}, #{content})
     </insert>
 
-    <select id="getArticle" resultType="articleBean">
+    <select id="getArticle" resultType="articleDTO">
         select * from article
     </select>
     
-    <select id="getSections" parameterType="Long" resultType="sectionBean">
+    <select id="getSections" parameterType="Long" resultType="sectionDTO">
         select * from section where articleId = #{articleId} order by orderId
     </select>
 
-    <select id="getRemark" parameterType="Long" resultType="remarkBean">
+    <select id="getRemark" parameterType="Long" resultType="remarkDTO">
         select * from remark where sectionId = #{sectionId} order by sectionId
     </select>
 
-    <insert id="insertRemark" parameterType="remarkBean">
+    <insert id="insertRemark" parameterType="remarkDTO">
         insert into remark(sectionId, userId, content, type, favor, createTime)
             values (#{sectionId}, #{userId}, #{content}, ${type}, #{favor}, #{createTime})
     </insert>

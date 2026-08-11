@@ -1,8 +1,6 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.vo
 
-import java.math.BigInteger
-
-data class RemarkBean(
+data class RemarkVO(
     val sectionId: Long,
     val userId: String,
     val remarkId: Long,

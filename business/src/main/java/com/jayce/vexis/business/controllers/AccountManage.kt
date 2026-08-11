@@ -7,11 +7,12 @@ import com.jayce.vexis.foundation.utils.NetUtil
 import com.jayce.vexis.foundation.utils.RedisUtil
 import com.jayce.vexis.foundation.utils.RedisUtil.isUserAlreadyOnline
 import com.jayce.vexis.foundation.utils.RedisUtil.setOnlineStatus
-import com.jayce.vexis.util.bean.ActiveBean
-import com.jayce.vexis.util.bean.TransferStatusBean
-import com.jayce.vexis.util.bean.UserBean
+import com.jayce.vexis.util.dto.UserDTO
 import com.jayce.vexis.util.getRandomString
 import com.jayce.vexis.util.toJson
+import com.jayce.vexis.util.vo
+import com.jayce.vexis.util.vo.ActiveVO
+import com.jayce.vexis.util.vo.StatusVO
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -32,21 +33,22 @@ class AccountManage : MyDispatchServlet() {
 
     @RequestMapping(value = ["/login"])
     @ResponseBody
-    fun login(unique: String, password: String): TransferStatusBean {
+    fun login(unique: String, password: String): StatusVO {
         val user =  userDao.findByID(unique) ?: return status(0)
-        if (user.password != password) return status(1)
+        if (user.auth.password != password) return status(1)
         if (isUserAlreadyOnline(user.userId)) {
             return status(-3)
         }
         val session = UUID.randomUUID().toString()
         setOnlineStatus(user.userId, session)
-        val userJson = user.copy(session = session).toJson()
+        val authVO = user.auth.copy(session = session)
+        val userJson = user.copy(auth = authVO).toJson()
         return status(-1, userJson)
     }
 
     @RequestMapping(value = ["/sendEmailCode"])
     @ResponseBody
-    fun sendEmailCode(id: String, email: String): TransferStatusBean {
+    fun sendEmailCode(id: String, email: String): StatusVO {
         val code = getRandomString(6)
         val user = userDao.findUserByEmail(email)
         if (user != null) return status(-1, "邮箱已被注册")
@@ -64,7 +66,7 @@ class AccountManage : MyDispatchServlet() {
 
     @RequestMapping(value = ["/register"])
     @ResponseBody
-    fun register(@RequestBody requestUser: UserBean, code: String): TransferStatusBean {
+    fun register(@RequestBody requestUser: UserDTO, code: String): StatusVO {
         log.d("user: $requestUser")
         val isEmailCodeOK = RedisUtil.checkEmailCode(requestUser.userId, code)
         if (!isEmailCodeOK) return status(-1, "验证码错误")
@@ -88,7 +90,7 @@ class AccountManage : MyDispatchServlet() {
 
     @RequestMapping(value = ["/getAllUser"])
     @ResponseBody
-    fun getAllUsers(): List<ActiveBean> = userDao.getAllUser()
+    fun getAllUsers(): List<ActiveVO> = userDao.getAllUser().vo()
 
     @RequestMapping(value = ["/setUserAsAdmin"])
     @ResponseBody
@@ -115,8 +117,8 @@ class AccountManage : MyDispatchServlet() {
         return 1
     }
 
-    private fun status(code: Int, data: String? = ""): TransferStatusBean {
+    private fun status(code: Int, data: String? = ""): StatusVO {
         val value = data ?: ""
-        return TransferStatusBean(code, value)
+        return StatusVO(code, value)
     }
 }

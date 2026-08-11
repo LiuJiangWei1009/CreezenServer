@@ -3,9 +3,12 @@ package com.jayce.vexis.business.controllers
 import com.jayce.vexis.business.dao.ArticleDao
 import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.foundation.Log
-import com.jayce.vexis.util.bean.*
+import com.jayce.vexis.util.dto.*
 import com.jayce.vexis.util.getRandomString
 import com.jayce.vexis.util.toBean
+import com.jayce.vexis.util.vo
+import com.jayce.vexis.util.vo.ArticleVO
+import com.jayce.vexis.util.vo.SectionRemarkVO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.transaction.annotation.Transactional
@@ -34,7 +37,7 @@ class ArticleManager : MyDispatchServlet() {
         @RequestPart("articleFile", required = false) articleFile: List<MultipartFile>?,
     ): Boolean {
         val time = System.currentTimeMillis()
-        val article = ArticleBean().apply {
+        val article = ArticleDTO().apply {
             this.userId = userID
             title = articleTitle
             createTime = time
@@ -42,7 +45,7 @@ class ArticleManager : MyDispatchServlet() {
             favor = 0
         }
         articleDao.saveArticle(article)
-        val sections = contents.toBean<List<ArticleContentBean>>() ?: listOf()
+        val sections = contents.toBean<List<SectionBodyDTO>>() ?: listOf()
         var fileIndex = 0
         sections.forEachIndexed { index, sec ->
             val content = when (sec.type) {
@@ -60,47 +63,48 @@ class ArticleManager : MyDispatchServlet() {
                 }
                 else -> ""
             }
-            val sectionBean = SectionBean (
+            val sectionDTO = SectionDTO (
                 article.articleId,
                 -1,
                 index,
                 sec.type,
                 content
             )
-            articleDao.saveSection(sectionBean)
+            articleDao.saveSection(sectionDTO)
         }
         return true
     }
 
     @RequestMapping("getArticle")
     @ResponseBody
-    fun getArticle(): List<ArticleBean> = articleDao.getArticle()
+    fun getArticle(): List<ArticleVO> = articleDao.getArticle().vo()
 
     @RequestMapping("getSection")
     @ResponseBody
     @Transactional
-    fun getSection(articleId: Long): List<SectionRemarkBean> {
+    fun getSection(articleId: Long): List<SectionRemarkVO> {
         val sectionList = articleDao.getSections(articleId)
-        val remarkList = arrayListOf<SectionRemarkBean>()
+        val remarkList = arrayListOf<SectionRemarkDTO>()
         sectionList.forEach {
             val sectionRemarkList = articleDao.getRemark(it.sectionId)
-            val sectionRemarkBean = SectionRemarkBean(
+            val sectionRemarkDTO = SectionRemarkDTO(
                 it.articleId,
                 it.sectionId,
                 it.type,
                 it.content,
                 sectionRemarkList
             )
-            remarkList.add(sectionRemarkBean)
+            remarkList.add(sectionRemarkDTO)
         }
-        return remarkList
+        return remarkList.vo()
     }
 
     @RequestMapping("postRemark")
     @ResponseBody
     fun postRemark(sectionId: Long, userId: String, content: String, type: Int): Boolean {
         log.d("receive remark:  $content")
-        articleDao.insertRemark(RemarkBean(
+        articleDao.insertRemark(
+            RemarkDTO(
             sectionId,
             userId,
             0L,
@@ -108,7 +112,8 @@ class ArticleManager : MyDispatchServlet() {
             type,
             0,
             System.currentTimeMillis()
-        ))
+        )
+        )
         return true
     }
 

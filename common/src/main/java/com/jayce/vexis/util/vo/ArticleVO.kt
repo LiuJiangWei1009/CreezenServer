@@ -1,8 +1,8 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.vo
 
 import com.jayce.vexis.util.Config.NIL
 
-data class ArticleBean(
+data class ArticleVO(
     var articleId: Long = 0,
     var userId: String = NIL,
     var title: String = NIL,

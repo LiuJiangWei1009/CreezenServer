@@ -1,12 +1,12 @@
 package com.jayce.vexis.business.dao
 
-import com.jayce.vexis.util.bean.FileBean
+import com.jayce.vexis.util.dto.FileDTO
 
 interface FileDao {
 
-    fun insertFile(file: FileBean)
+    fun insertFile(file: FileDTO)
 
-    fun getFile(): List<FileBean>
+    fun getFile(): List<FileDTO>
 
-    fun findFileByHash(fileHash: String): FileBean?
+    fun findFileByHash(fileHash: String): FileDTO?
 }

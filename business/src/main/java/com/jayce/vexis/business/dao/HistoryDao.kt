@@ -1,10 +1,10 @@
 package com.jayce.vexis.business.dao
 
-import com.jayce.vexis.util.bean.HistoryBean
+import com.jayce.vexis.util.dto.HistoryDTO
 
 interface HistoryDao {
 
-    fun insertEvent(historyBean: HistoryBean)
+    fun insertEvent(historyDTO: HistoryDTO)
 
-    fun queryAllEvent(): List<HistoryBean>
+    fun queryAllEvent(): List<HistoryDTO>
 }

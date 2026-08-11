@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.jayce.vexis.business.dao.HistoryDao">
-    <insert id="insertEvent" parameterType="historyBean">
+    <insert id="insertEvent" parameterType="historyDTO">
         insert into history values (#{time}, #{event})
     </insert>
 
-    <select id="queryAllEvent" resultType="historyBean">
+    <select id="queryAllEvent" resultType="historyDTO">
         select * from history
     </select>
 </mapper>

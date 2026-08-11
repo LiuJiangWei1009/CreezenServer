@@ -2,7 +2,7 @@ package com.jayce.vexis.foundation.utils
 
 import com.jayce.vexis.core.MyDispatchServlet.Companion.BASE_FILE_PATH
 import com.jayce.vexis.foundation.Log
-import com.jayce.vexis.util.bean.FileType
+import com.jayce.vexis.util.bo.FileTypeBO
 import org.yaml.snakeyaml.LoaderOptions
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.Constructor
@@ -138,7 +138,7 @@ object FileHelper {
             val yaml = Yaml(Constructor(LoaderOptions()))
             val source = "fileType.yaml"
             javaClass.classLoader.getResourceAsStream(source)?.use {
-                val values = yaml.loadAs(it, FileType::class.java)
+                val values = yaml.loadAs(it, FileTypeBO::class.java)
                 return values.typeMap
             } ?: run {
                 println("stream is empty")

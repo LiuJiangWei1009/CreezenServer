@@ -1,6 +1,6 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.vo
 
-data class FeedbackBean(
+data class FeedbackVO(
     val feedbackID: String,
     val userName: String,
     val userID: String,

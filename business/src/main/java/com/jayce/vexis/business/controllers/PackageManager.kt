@@ -1,10 +1,10 @@
 package com.jayce.vexis.business.controllers
 
-import com.jayce.vexis.util.bean.ApkSimpleInfo
+import com.jayce.vexis.util.vo.ApkSimpleVO
 import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.util.getRandomString
 import com.jayce.vexis.foundation.Log
-import com.jayce.vexis.util.bean.ApkInfoBean
+import com.jayce.vexis.util.bo.ApkInfoBO
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
 import org.springframework.stereotype.Controller
@@ -23,7 +23,7 @@ class PackageManager: MyDispatchServlet() {
 
     @RequestMapping(value = ["/checkApkInfo"])
     @ResponseBody
-    fun checkApkInfo(@RequestParam("apkFile") file: MultipartFile): ApkInfoBean {
+    fun checkApkInfo(@RequestParam("apkFile") file: MultipartFile): ApkInfoBO {
         val tempName = getRandomString(20)
         val tempPath = "$apkBasePath$tempName.apk"
         val tempFile = File(tempPath)
@@ -35,7 +35,7 @@ class PackageManager: MyDispatchServlet() {
         val fileSize = "$fileSize_M M"
         log.d("versionName: $versionName  versionCode: $versionCode")
         tempFile.delete()
-        return ApkInfoBean(versionCode, versionName, fileSize)
+        return ApkInfoBO(versionCode, versionName, fileSize)
     }
 
     @RequestMapping(value = ["/uploadApk"])
@@ -55,14 +55,14 @@ class PackageManager: MyDispatchServlet() {
 
     @RequestMapping(value = ["/checkVersion"])
     @ResponseBody
-    fun checkVersion(): ApkSimpleInfo {
+    fun checkVersion(): ApkSimpleVO {
         val maxVersion = getMaxVersion()
         val fileDirectory = "${apkBasePath}$maxVersion"
         log.d("maxversion: $maxVersion $fileDirectory")
-        val file = File(fileDirectory).listFiles()?.get(0) ?: return ApkSimpleInfo("0", 0, 0)
+        val file = File(fileDirectory).listFiles()?.get(0) ?: return ApkSimpleVO("0", 0, 0)
         val metaData = resolveApkFile(file)
         val modifyTime = file.lastModified()
-        return ApkSimpleInfo(metaData.versionName, metaData.versionCode, modifyTime)
+        return ApkSimpleVO(metaData.versionName, metaData.versionCode, modifyTime)
     }
 
     private fun resolveApkFile(file: File): ApkMeta {

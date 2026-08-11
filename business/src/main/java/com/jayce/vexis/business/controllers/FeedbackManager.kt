@@ -1,12 +1,13 @@
 package com.jayce.vexis.business.controllers
 
-import com.alibaba.druid.sql.visitor.functions.If
-import com.jayce.vexis.util.bean.FeedbackBean
+import com.jayce.vexis.util.dto.FeedbackDTO
 import com.jayce.vexis.business.dao.FeedbackDao
 import com.jayce.vexis.business.dao.UserDao
 import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.foundation.Log
 import com.jayce.vexis.foundation.utils.RedisUtil
+import com.jayce.vexis.util.vo
+import com.jayce.vexis.util.vo.FeedbackVO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -32,8 +33,8 @@ class FeedbackManager: MyDispatchServlet() {
         content: String,
         type: String
     ): Boolean {
-        val userName = userDao.findByID(userID)?.nickname ?: "匿名用户"
-        val feedbackBean = FeedbackBean(
+        val userName = userDao.findByID(userID)?.profile?.nickname ?: "匿名用户"
+        val feedbackDTO = FeedbackDTO(
             feedbackID,
             userName,
             userID,
@@ -44,14 +45,14 @@ class FeedbackManager: MyDispatchServlet() {
             0,
             0
         )
-        feedbackDao.insertFeedback(feedbackBean)
+        feedbackDao.insertFeedback(feedbackDTO)
         return true
     }
 
     @RequestMapping("/getFeedback")
     @ResponseBody
-    fun getFeedback(): List<FeedbackBean> {
-        return feedbackDao.getFeedback()
+    fun getFeedback(): List<FeedbackVO> {
+        return feedbackDao.getFeedback().vo()
     }
 
     @RequestMapping("/supportFeedback")

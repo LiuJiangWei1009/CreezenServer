@@ -2,16 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.jayce.vexis.business.dao.FileDao">
-    <insert id="insertFile" parameterType="fileBean">
+    <insert id="insertFile" parameterType="fileDTO">
         insert into resource values (#{userId}, #{fileName},#{fileID},#{fileSuffix},#{description},
                                      #{illustrate},#{fileSize}, #{uploadTime}, #{fileHash})
     </insert>
     
-    <select id="getFile" resultType="fileBean">
+    <select id="getFile" resultType="fileDTO">
         select * from resource
     </select>
 
-    <select id="findFileByHash" parameterType="String" resultType="fileBean">
+    <select id="findFileByHash" parameterType="String" resultType="fileDTO">
         select * from resource where fileHash = #{fileHash}
     </select>
 </mapper>

@@ -1,7 +1,7 @@
 package com.jayce.vexis.foundation.socket
 
 import com.jayce.vexis.util.Config.EVENT_TYPE_EXIT
-import com.jayce.vexis.util.bean.TelecomBean
+import com.jayce.vexis.util.dto.EventDTO
 import com.jayce.vexis.util.toBean
 import com.jayce.vexis.foundation.Log
 import com.jayce.vexis.foundation.utils.RedisUtil
@@ -40,7 +40,7 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
     fun init() {
         reader = BufferedReader(InputStreamReader(socket.getInputStream(), "UTF-8"))
         writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), "UTF-8"))
-        val shakeMessage = reader.readLine().toBean<TelecomBean>()
+        val shakeMessage = reader.readLine().toBean<EventDTO>()
         if (shakeMessage == null || !shakeMessage.isShake()) {
             destroy()
             return
@@ -50,7 +50,7 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
         startWrite()
     }
 
-    private fun identify(shakeMessage: TelecomBean) {
+    private fun identify(shakeMessage: EventDTO) {
         userId = shakeMessage.content
         RedisUtil.createStreamGroupIfNeed(userId)
         if (verifyOnlineStatus(shakeMessage)) {

@@ -1,5 +1,5 @@
-package com.jayce.vexis.util.bean
+package com.jayce.vexis.util.bo
 
-class FileType(
+class FileTypeBO(
     var typeMap: Map<String, List<String>> = mapOf()
 )

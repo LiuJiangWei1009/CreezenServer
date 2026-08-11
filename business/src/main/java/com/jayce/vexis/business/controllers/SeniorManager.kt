@@ -3,7 +3,9 @@ package com.jayce.vexis.business.controllers
 import com.jayce.vexis.business.dao.SeniorDao
 import com.jayce.vexis.core.MyDispatchServlet
 import com.jayce.vexis.foundation.Log
-import com.jayce.vexis.util.bean.PeerAdviceBean
+import com.jayce.vexis.util.dto.PeerDTO
+import com.jayce.vexis.util.vo
+import com.jayce.vexis.util.vo.PeerVO
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,9 +21,9 @@ class SeniorManager: MyDispatchServlet() {
 
     @RequestMapping("/postAdvice")
     @ResponseBody
-    fun postAdvice(peerAdviceBean: PeerAdviceBean): Boolean {
-        log.d("receive:  $peerAdviceBean")
-        seniorDao.addAdvice(peerAdviceBean)
+    fun postAdvice(peerDTO: PeerDTO): Boolean {
+        log.d("receive:  $peerDTO")
+        seniorDao.addAdvice(peerDTO)
         return true
     }
 
@@ -31,9 +33,9 @@ class SeniorManager: MyDispatchServlet() {
         primary: String,
         second: String,
         tertiary: String,
-    ): List<PeerAdviceBean> {
-        val query = PeerAdviceBean(primary, second, tertiary, "")
+    ): List<PeerVO> {
+        val query = PeerDTO(primary, second, tertiary, "")
         val list = seniorDao.getAdvice(query)
-        return list
+        return list.vo()
     }
 }
