@@ -6,7 +6,7 @@ import com.jayce.vexis.util.vo.FeedbackVO
 data class FeedbackDTO(
     val feedbackID: String,
     val userName: String,
-    val userID: String,
+    val userID: String? = null,
     val type: String,
     val title: String,
     val content: String,
@@ -16,6 +16,6 @@ data class FeedbackDTO(
 ): DataConverter<FeedbackVO> {
 
     override fun vo(): FeedbackVO {
-        return FeedbackVO(feedbackID, userName, userID, type, title, content, createTime, support, against)
+        return FeedbackVO(feedbackID, userName, userID ?: "", type, title, content, createTime, support, against)
     }
 }

@@ -67,7 +67,6 @@ class AccountManage : MyDispatchServlet() {
     @RequestMapping(value = ["/register"])
     @ResponseBody
     fun register(@RequestBody requestUser: UserDTO, code: String): StatusVO {
-        log.d("user: $requestUser")
         val isEmailCodeOK = RedisUtil.checkEmailCode(requestUser.userId, code)
         if (!isEmailCodeOK) return status(-1, "验证码错误")
         userDao.registerUser(requestUser)
