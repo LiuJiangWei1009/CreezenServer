@@ -1,26 +1,25 @@
 package com.jayce.vexis.foundation.utils
 
+import com.jayce.vexis.foundation.Log
 import com.jayce.vexis.util.Config.EVENT_TYPE_EXIT
 import com.jayce.vexis.util.dto.EventDTO
 import com.jayce.vexis.util.toJson
-import com.jayce.vexis.foundation.Log
 import org.springframework.context.ApplicationContext
-import org.springframework.data.redis.connection.stream.*
+import org.springframework.data.redis.connection.stream.MapRecord
+import org.springframework.data.redis.connection.stream.ReadOffset
+import org.springframework.data.redis.connection.stream.StreamOffset
+import org.springframework.data.redis.connection.stream.StreamReadOptions
 import org.springframework.data.redis.core.*
 import java.time.Duration
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 
 object RedisUtil {
 
     const val STREAM_MESSAGE_ID = "msgId"
     const val STREAM_CONTENT_KEY = "messageKey"
-    private const val STREAM_CONSUMER = "consumer"
     private const val STREAM_NAME = "telecom"
     private const val ONLINE_PREFIX = "ONLINE_"
     private const val STREAM_READ_COUNT = 256L
-    private const val STREAM_BLOCK_TIME = 2L
 
     private val log by lazy { Log(this::class.java) }
 
@@ -36,9 +35,6 @@ object RedisUtil {
     private lateinit var clusterOpt: ClusterOperations<String, Any>
 
     private val streamOption =  StreamReadOptions.empty().count(STREAM_READ_COUNT).block(Duration.ZERO)
-    private val streamOffset =  StreamOffset.create(STREAM_NAME, ReadOffset.lastConsumed())
-    private val ackStreamOffset = StreamOffset.create(STREAM_NAME, ReadOffset.from("0"))
-    private val consumerMap: ConcurrentHashMap<String, Consumer> = ConcurrentHashMap()
 
     /**
      * 所有需要通过aop代理的数据，都需要通过spring管理
@@ -67,27 +63,11 @@ object RedisUtil {
         clearOnlineStatus()
     }
 
-    fun createStreamGroupIfNeed(userId: String) {
-        kotlin.runCatching {
-            streamOpt.createGroup(STREAM_NAME, ReadOffset.from("0"), userId)
-        }.onFailure {
-            log.i("Group $userId exist!")
-        }
-    }
-
     @Suppress("UNCHECKED_CAST")
-    fun <K, V> readStream(userId: String, ack: AtomicBoolean): List<MapRecord<String, K, V>> {
-        val consumer = consumerMap.getOrPut(userId) {
-            Consumer.from(userId, STREAM_CONSUMER)
-        }
-        val finalList = arrayListOf<MapRecord<String, Any, Any>>()
-        if (ack.get()) {
-            ack.set(false)
-            finalList.addAll(streamOpt.read(consumer, streamOption, ackStreamOffset) ?: listOf())
-        }
-        val list = streamOpt.read(consumer, streamOption, streamOffset)
-        finalList.addAll(list ?: listOf())
-        return finalList as List<MapRecord<String, K, V>>
+    fun <K, V> readStream(eventTag: String): List<MapRecord<String, K, V>> {
+        val eventOffset =  StreamOffset.create(STREAM_NAME, ReadOffset.from(eventTag))
+        val eventList = streamOpt.read(streamOption, eventOffset)
+        return eventList as List<MapRecord<String, K, V>>
     }
 
     fun <V> writeStream(content: V) {
@@ -95,19 +75,12 @@ object RedisUtil {
         streamOpt.add(STREAM_NAME, map)
     }
 
-    fun sendFinishMsg(userId: String, msg: EventDTO? = null) {
-        val finishJson = EventDTO(
+    fun sendFinishMsg(msg: EventDTO) {
+        val finishJson = msg.copy(
             type = EVENT_TYPE_EXIT,
-            userId = userId,
-            nickName = msg?.nickName ?: "",
-            session = msg?.session ?: "",
-            time = msg?.time ?: System.currentTimeMillis()
+            time = System.currentTimeMillis()
         ).toJson()
         writeStream(finishJson)
-    }
-
-    fun ack(userId: String, id: RecordId) {
-        streamOpt.acknowledge(STREAM_NAME, userId, id)
     }
 
     fun setOnlineStatus(userId: String, session: String) {

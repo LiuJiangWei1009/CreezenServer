@@ -1,27 +1,27 @@
 package com.jayce.vexis.foundation.socket
 
-import com.jayce.vexis.util.Config.EVENT_TYPE_EXIT
-import com.jayce.vexis.util.dto.EventDTO
-import com.jayce.vexis.util.toBean
 import com.jayce.vexis.foundation.Log
-import com.jayce.vexis.foundation.utils.RedisUtil
 import com.jayce.vexis.foundation.utils.RedisUtil.STREAM_CONTENT_KEY
 import com.jayce.vexis.foundation.utils.RedisUtil.STREAM_MESSAGE_ID
-import com.jayce.vexis.foundation.utils.RedisUtil.ack
 import com.jayce.vexis.foundation.utils.RedisUtil.readStream
 import com.jayce.vexis.foundation.utils.RedisUtil.sendFinishMsg
 import com.jayce.vexis.foundation.utils.RedisUtil.setOfflineStatus
 import com.jayce.vexis.foundation.utils.RedisUtil.verifyOnlineStatus
 import com.jayce.vexis.foundation.utils.RedisUtil.writeStream
 import com.jayce.vexis.foundation.utils.ThreadUtil.workLooper
-import kotlinx.coroutines.*
+import com.jayce.vexis.util.Config.EVENT_TYPE_EXIT
+import com.jayce.vexis.util.dto.EventDTO
+import com.jayce.vexis.util.toBean
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
-import java.util.concurrent.atomic.AtomicBoolean
 
 class UserSocket(private val socket: Socket, private val callback: (UserSocket, String) -> Unit) {
 
@@ -32,10 +32,10 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private lateinit var userId: String
+    private lateinit var _shakeMessage: EventDTO
+    private var eventTag: String = "0"
     private var hasFinish: Boolean = false
     private var isDied: Boolean = false
-    private var isFirst: AtomicBoolean = AtomicBoolean(true)
 
     fun init() {
         reader = BufferedReader(InputStreamReader(socket.getInputStream(), "UTF-8"))
@@ -51,12 +51,12 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
     }
 
     private fun identify(shakeMessage: EventDTO) {
-        userId = shakeMessage.content
-        RedisUtil.createStreamGroupIfNeed(userId)
+        _shakeMessage = shakeMessage
+        eventTag = shakeMessage.content
         if (verifyOnlineStatus(shakeMessage)) {
-            callback.invoke(this@UserSocket, userId)
+            callback.invoke(this@UserSocket, shakeMessage.userId)
         } else {
-            sendFinishMsg(userId, shakeMessage)
+            sendFinishMsg(shakeMessage)
         }
     }
 
@@ -79,20 +79,22 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
 
     private fun startWrite() {
         workLooper(scope) {
-            readStream<String, String>(userId, isFirst).forEach {
+            val list = readStream<String, String>(eventTag)
+            eventTag = list.last().id.value
+            list.forEach {
                 log.d("发送消息： ${it.value}")
                 val json = JSONObject(it.value[STREAM_CONTENT_KEY])
                 val type = json.optInt("type", -1)
+                val eventSession = json.optString("session") ?: ""
                 if (type == EVENT_TYPE_EXIT) {
-                    ack(userId, it.id)
-                    setOfflineStatus(userId)
+                    if (eventSession != _shakeMessage.session) return@forEach
+                    setOfflineStatus(_shakeMessage.userId)
                     write(json.toString())
                     destroy()
                     return@workLooper false
                 }
                 json.put(STREAM_MESSAGE_ID, it.id)
                 write(json.toString())
-                ack(userId, it.id)
             }
             return@workLooper true
         }
@@ -108,8 +110,8 @@ class UserSocket(private val socket: Socket, private val callback: (UserSocket, 
     }
 
     private fun markDeath() {
-        sendFinishMsg(userId)
-        setOfflineStatus(userId)
+        sendFinishMsg(_shakeMessage)
+        setOfflineStatus(_shakeMessage.userId)
         hasFinish = true
     }
 

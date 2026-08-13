@@ -41,7 +41,7 @@ class AccountManage : MyDispatchServlet() {
         }
         val session = UUID.randomUUID().toString()
         setOnlineStatus(user.userId, session)
-        val authVO = user.auth.copy(session = session)
+        val authVO = user.auth.copy(session = session, password = "*")
         val userJson = user.copy(auth = authVO).toJson()
         return status(-1, userJson)
     }
