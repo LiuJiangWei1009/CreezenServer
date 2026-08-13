@@ -13,6 +13,7 @@ import com.jayce.vexis.util.toJson
 import com.jayce.vexis.util.vo
 import com.jayce.vexis.util.vo.ActiveVO
 import com.jayce.vexis.util.vo.StatusVO
+import com.jayce.vexis.util.vo.UserVO
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -114,6 +115,12 @@ class AccountManage : MyDispatchServlet() {
         if (!status) return 0
         userDao.updateRelation(userId)
         return 1
+    }
+
+    @RequestMapping(value = ["/queryUserById"])
+    @ResponseBody
+    fun queryUserById(userId: String): UserVO {
+        return userDao.findByID(userId)?.vo() ?: UserVO()
     }
 
     private fun status(code: Int, data: String? = ""): StatusVO {
