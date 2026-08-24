@@ -24,4 +24,6 @@ interface UserDao {
     fun followUser(userId: String, fansId: String, relation: Int): Boolean
     
     fun updateRelation(userId: String): Boolean
+
+    fun queryByContent(content: String): List<UserDTO>
 }

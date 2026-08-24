@@ -123,6 +123,12 @@ class AccountManage : MyDispatchServlet() {
         return userDao.findByID(userId)?.vo() ?: UserVO()
     }
 
+    @RequestMapping(value = ["/queryUserByContent"])
+    @ResponseBody
+    fun queryUserByContent(content: String): List<UserVO> {
+        return userDao.queryByContent(content).vo()
+    }
+
     private fun status(code: Int, data: String? = ""): StatusVO {
         val value = data ?: ""
         return StatusVO(code, value)

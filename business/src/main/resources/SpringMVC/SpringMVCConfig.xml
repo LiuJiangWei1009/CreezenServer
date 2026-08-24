@@ -27,6 +27,10 @@
             <mvc:exclude-mapping path="/uploadApk"/>
             <mvc:exclude-mapping path="/checkApkInfo"/>
             <mvc:exclude-mapping path="/loadSlider"/>
+            <mvc:exclude-mapping path="/getDynamic"/>
+            <mvc:exclude-mapping path="/loadDynamicSubModule"/>
+            <mvc:exclude-mapping path="/queryUserByContent"/>
+            <mvc:exclude-mapping path="/queryUserById"/>
             <bean class="com.jayce.vexis.core.StatusInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

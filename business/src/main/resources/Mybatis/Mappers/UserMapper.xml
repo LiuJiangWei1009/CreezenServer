@@ -86,4 +86,8 @@
     <select id="findUserByEmail" parameterType="String" resultMap="userMap">
         select * from user where email = #{profile.email}
     </select>
+
+    <select id="queryByContent" parameterType="String" resultMap="userMap">
+        select * from user where INSTR(userid, #{content}) > 0 or INSTR(nickname, #{content})
+    </select>
 </mapper>
